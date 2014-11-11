@@ -15,6 +15,7 @@
 #import "Util.h"
 #import <AVFoundation/AVFoundation.h>
 #import "HudNode.h"
+#import "GameOverNode.h"
 
 
 @interface GamePlayScene()
@@ -31,6 +32,9 @@
 @property (nonatomic) SKAction *laserSFX;
 
 @property (nonatomic) AVAudioPlayer *backgroundMusic;
+@property (nonatomic) BOOL gameOver;
+@property (nonatomic) BOOL restart;
+@property (nonatomic) BOOL gameOverDisplayed;
 
 @end
 
@@ -46,6 +50,9 @@
         self.addEnemyTimeInterval = 1.5;
         self.totalGameTime = 0;
         self.minSpeed = SpaceDogMinSpeed;
+        self.restart = NO;
+        self.gameOver = NO;
+        self.gameOverDisplayed = NO;
         
         SKSpriteNode *background = [SKSpriteNode spriteNodeWithImageNamed:@"background_1"];
         background.position = CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame));
@@ -119,7 +126,7 @@
         self.totalGameTime += currentTime - self.lastUpdateTimeInterval;
     }
     
-    if (self.timeSinceEnemyAdded > 1.5) {
+    if (self.timeSinceEnemyAdded > 1.5 && !self.gameOver) {
         [self addSpaceDog];
         self.timeSinceEnemyAdded = 0;
     }
@@ -142,16 +149,42 @@
         self.minSpeed = -100;
     }
     
+    if (self.gameOver && !self.gameOverDisplayed) {
+        
+        [self performGameOver];
+    }
+    
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    
+    if (!self.gameOver) {
     
     for (UITouch *touch in touches) {
         CGPoint position = [touch locationInNode:self];
         [self shootProjectileTowardsPosition:position];
         
     }
+    } else if (self.restart) {
+        
+        for (SKNode *node  in [self children]) {
+            [node removeFromParent];
+        }
+        
+        GamePlayScene *scene = [GamePlayScene sceneWithSize:self.view.bounds.size];
+        [self.view presentScene:scene];
+        
+    }
     
+}
+
+-(void)performGameOver {
+    GameOverNode *gameOver = [GameOverNode gameOverAtPosition:CGPointMake(CGRectGetMidX(self.frame), CGRectGetMidY(self.frame))];
+    
+    [self addChild:gameOver];
+    self.restart = YES;
+    self.gameOverDisplayed = YES;
+    [gameOver performAnimation];
 }
 
 -(void)shootProjectileTowardsPosition:(CGPoint)position {
@@ -177,7 +210,7 @@
 
 -(void)loseLife {
     HudNode *hud = (HudNode*)[self childNodeWithName:@"HUD"];
-    [hud loseLife];
+    self.gameOver = [hud loseLife];
 }
 
 -(void)didBeginContact:(SKPhysicsContact *)contact {
