@@ -1,5 +1,5 @@
 //
-//  GamePlayScene.h
+//  GroundNode.h
 //  Space Cat
 //
 //  Created by Jacob Cho on 2014-11-10.
@@ -8,6 +8,8 @@
 
 #import <SpriteKit/SpriteKit.h>
 
-@interface GamePlayScene : SKScene <SKPhysicsContactDelegate>
+@interface GroundNode : SKSpriteNode
+
++(instancetype) groundWithSize:(CGSize)size;
 
 @end

@@ -1,5 +1,5 @@
 //
-//  GamePlayScene.h
+//  SpaceCatNode.h
 //  Space Cat
 //
 //  Created by Jacob Cho on 2014-11-10.
@@ -8,6 +8,9 @@
 
 #import <SpriteKit/SpriteKit.h>
 
-@interface GamePlayScene : SKScene <SKPhysicsContactDelegate>
+@interface SpaceCatNode : SKSpriteNode
+
++(instancetype) spaceCatAtPosition:(CGPoint)position;
+-(void)performTap;
 
 @end
